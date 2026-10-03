@@ -8,6 +8,7 @@ const { class: className = '' } = Astro.props;
 
 <div class:list={['refracted-light-wrapper', className]} aria-hidden="true">
   <canvas id="refracted-light-canvas" class="refracted-canvas"></canvas>
+  <div class="vintage-grain-overlay"></div>
   <div class="refracted-fallback"></div>
 </div>
 
@@ -21,7 +22,7 @@ const { class: className = '' } = Astro.props;
     overflow: hidden;
     pointer-events: none;
     z-index: 0;
-    background: #03070f;
+    background: #02050b;
   }
 
   .refracted-canvas {
@@ -33,12 +34,38 @@ const { class: className = '' } = Astro.props;
     z-index: 1;
   }
 
+  /* Analog Film Grain Texture Overlay */
+  .vintage-grain-overlay {
+    position: absolute;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.045'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0.6;
+    animation: grainJitter 8s steps(10) infinite;
+  }
+
+  @keyframes grainJitter {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-2%, -3%); }
+    20% { transform: translate(3%, 1%); }
+    30% { transform: translate(-1%, 2%); }
+    40% { transform: translate(2%, -1%); }
+    50% { transform: translate(-3%, 3%); }
+    60% { transform: translate(1%, -2%); }
+    70% { transform: translate(-2%, 1%); }
+    80% { transform: translate(3%, -3%); }
+    90% { transform: translate(-1%, -1%); }
+  }
+
   .refracted-fallback {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(120% 90% at 30% 20%, #0b2a46, #03070f 70%);
+    background: radial-gradient(120% 90% at 30% 20%, #0d2238, #02050b 75%);
     z-index: 0;
   }
 </style>
@@ -56,10 +83,7 @@ const { class: className = '' } = Astro.props;
       }) as WebGLRenderingContext | null) ||
       (canvas.getContext('experimental-webgl') as WebGLRenderingContext | null);
 
-    if (!gl) {
-      // Graceful fallback to CSS radial-gradient
-      return;
-    }
+    if (!gl) return;
 
     const vsSource = `
       attribute vec2 p;
@@ -68,6 +92,7 @@ const { class: className = '' } = Astro.props;
       }
     `;
 
+    // Vintage Prism & Water Refraction Shader
     const fsSource = `
       #ifdef GL_FRAGMENT_PRECISION_HIGH
       precision highp float;
@@ -80,12 +105,12 @@ const { class: className = '' } = Astro.props;
       uniform vec2 m;
       const float TAU = 6.28318530718;
 
-      // Cáusticas de agua (patrón periódico, sin costuras)
+      // Vintage Caustics (patrón periódico con refracción fluida)
       float caustic(vec2 uv, float tm) {
         vec2 p = mod(uv * TAU, TAU) - 250.0;
         vec2 i = p;
         float c = 1.0;
-        float inten = 0.006;
+        float inten = 0.0055;
         for (int n = 0; n < 5; n++) {
           float fn = float(n) + 1.0;
           float tt = tm * (1.0 - (3.5 / fn));
@@ -98,7 +123,7 @@ const { class: className = '' } = Astro.props;
         }
         c /= 5.0;
         c = 1.17 - pow(abs(c), 1.4);
-        return pow(abs(c), 8.0);
+        return pow(abs(c), 7.5);
       }
 
       // Rayo difuso con perfil gaussiano
@@ -106,47 +131,74 @@ const { class: className = '' } = Astro.props;
         return exp(-x * x / max(w, 0.00001));
       }
 
+      // Ruido pseudo-aleatorio para micrograno analógico
+      float filmNoise(vec2 co, float time) {
+        return fract(sin(dot(co + vec2(time * 12.34, time * 56.78), vec2(12.9898, 78.233))) * 43758.5453);
+      }
+
       void main() {
         vec2 uv = gl_FragCoord.xy / max(r.y, 1.0);
         vec2 mo = (m - 0.5);
-        float T = t * 0.35 + 23.0;
+        float T = t * 0.32 + 23.0;
 
-        // Fondo: azul profundo con viñeta
+        // Fondo: tono vintage profundo (azul medianoche con tinte cálido ámbar/índigo)
         vec2 n = gl_FragCoord.xy / max(r, vec2(1.0));
-        vec3 col = mix(vec3(0.008, 0.02, 0.045), vec3(0.02, 0.10, 0.17), smoothstep(0.0, 1.0, n.y * 0.7 + n.x * 0.3));
+        vec3 colDeep = vec3(0.008, 0.014, 0.026);
+        vec3 colVintageMid = vec3(0.024, 0.065, 0.115);
+        vec3 col = mix(colDeep, colVintageMid, smoothstep(0.0, 1.0, n.y * 0.65 + n.x * 0.35 + mo.y * 0.1));
 
-        // Cáusticas con dispersión cromática (R, G, B desfasados = arcoíris en los bordes)
-        vec2 d = vec2(0.010, 0.006) * (1.0 + mo.x * 1.5);
-        vec2 q = uv * 0.85 + mo * 0.12;
+        // Cáusticas con dispersión cromática y halación cálida estilo película analógica
+        vec2 d = vec2(0.011, 0.007) * (1.0 + mo.x * 1.6);
+        vec2 q = uv * 0.82 + mo * 0.14;
         vec3 c = vec3(caustic(q, T), caustic(q + d, T), caustic(q + d * 2.0, T));
-        col += c * vec3(1.1, 1.0, 1.2) * 0.9;
+        
+        // Halación vintage: añade sutil calidez rojiza/ámbar en los bordes de dispersión
+        vec3 causticColor = vec3(1.15, 1.02, 1.25) * 0.88;
+        causticColor += vec3(0.22, 0.08, 0.0) * c.r; // Vintage red halation
+        col += c * causticColor;
 
-        // Rayos diagonales de luz refractada, con el espectro separado por canal
-        float a = -0.62 + mo.x * 0.35 + mo.y * 0.15;
+        // Rayos de luz refractada en prisma vintage
+        float a = -0.60 + mo.x * 0.38 + mo.y * 0.18;
         mat2 R = mat2(cos(a), -sin(a), sin(a), cos(a));
-        vec2 b = R * (uv - vec2(0.9, 0.5));
+        vec2 b = R * (uv - vec2(0.88, 0.5));
         vec3 beams = vec3(0.0);
         for (int k = 0; k < 6; k++) {
           float fk = float(k);
-          float pos = -0.9 + fk * 0.34 + sin(t * 0.12 + fk * 2.1) * 0.12;
-          float w = 0.0006 + 0.0016 * fract(fk * 0.37 + 0.2);
-          float disp = 0.022 + 0.012 * sin(t * 0.2 + fk);
-          float fade = smoothstep(-0.9, 0.1, b.y) * (1.0 - smoothstep(0.2, 1.1, b.y));
+          float pos = -0.9 + fk * 0.34 + sin(t * 0.11 + fk * 2.1) * 0.12;
+          float w = 0.0007 + 0.0018 * fract(fk * 0.37 + 0.2);
+          float disp = 0.024 + 0.014 * sin(t * 0.18 + fk);
+          float fade = smoothstep(-0.9, 0.1, b.y) * (1.0 - smoothstep(0.2, 1.15, b.y));
           vec3 s = vec3(beam(b.x - pos, w), beam(b.x - pos - disp, w), beam(b.x - pos - disp * 2.0, w));
-          // tono cálido->frío a lo largo del rayo
-          s *= mix(vec3(1.0, 0.8, 0.55), vec3(0.55, 0.8, 1.0), 0.5 + 0.5 * sin(b.y * 3.0 + fk));
-          beams += s * fade * (0.55 + 0.45 * sin(t * 0.5 + fk * 1.7));
+          
+          // Paleta vintage cálido/frío: ámbar dorado 35mm -> cian espectral
+          vec3 warmAmber = vec3(1.05, 0.82, 0.52);
+          vec3 coolPrism = vec3(0.48, 0.78, 0.98);
+          s *= mix(warmAmber, coolPrism, 0.5 + 0.5 * sin(b.y * 3.2 + fk));
+          beams += s * fade * (0.55 + 0.45 * sin(t * 0.45 + fk * 1.7));
         }
-        col += beams * 0.55;
+        col += beams * 0.58;
 
-        // Halo suave en el origen de la luz
-        float h = exp(-length(uv - vec2(1.6, 0.9) - mo * 0.2) * 1.6);
-        col += vec3(0.25, 0.45, 0.7) * h * 0.35;
+        // Halo óptico vintage suave alrededor del cursor y la fuente de luz
+        float hLight = exp(-length(uv - vec2(1.55, 0.88) - mo * 0.22) * 1.5);
+        col += vec3(0.32, 0.48, 0.72) * hLight * 0.38;
 
-        // Viñeta y tone mapping
-        col *= 1.0 - 0.55 * length(n - 0.5);
-        col = 1.0 - exp(-col * 1.45);
-        col = pow(max(col, vec3(0.0)), vec3(0.92));
+        // Resplandor cálido sutil que sigue al cursor del mouse (vintage optical flare)
+        vec2 mouseUV = vec2(m.x * (r.x / r.y), 1.0 - m.y);
+        float mouseGlow = exp(-length(uv - mouseUV) * 2.6);
+        col += vec3(0.28, 0.36, 0.55) * mouseGlow * 0.25;
+
+        // Viñeta vintage analógica (bordes oscurecidos con curvatura de lente)
+        float distFromCenter = length(n - 0.5);
+        col *= 1.0 - 0.58 * pow(distFromCenter * 1.35, 1.8);
+
+        // Micro-grano fílmico embebido en el sombreador
+        float grain = (filmNoise(gl_FragCoord.xy, t) - 0.5) * 0.035;
+        col += vec3(grain);
+
+        // Tone mapping cinematográfico (curva de película retro)
+        col = 1.0 - exp(-col * 1.48);
+        col = pow(max(col, vec3(0.0)), vec3(0.94));
+
         gl_FragColor = vec4(col, 1.0);
       }
     `;
@@ -183,7 +235,6 @@ const { class: className = '' } = Astro.props;
 
     gl.useProgram(program);
 
-    // Fullscreen single triangle covering [-1, -1] to [3, -1] and [-1, 3]
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(
@@ -249,12 +300,12 @@ const { class: className = '' } = Astro.props;
     function render(now: number) {
       if (isDisposed || !gl || !canvas) return;
 
-      // Smooth mouse interpolation
-      mx += (tx - mx) * 0.04;
-      my += (ty - my) * 0.04;
+      // Smooth inertia mouse tracking
+      mx += (tx - mx) * 0.045;
+      my += (ty - my) * 0.045;
 
       gl.uniform2f(uR, canvas.width, canvas.height);
-      gl.uniform1f(uT, ((now - t0) / 1000) * (calm ? 0.25 : 1.0));
+      gl.uniform1f(uT, ((now - t0) / 1000) * (calm ? 0.2 : 1.0));
       gl.uniform2f(uM, mx, my);
 
       gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -263,7 +314,6 @@ const { class: className = '' } = Astro.props;
 
     animationId = requestAnimationFrame(render);
 
-    // Lifecycle cleanup on page transitions
     document.addEventListener(
       'astro:before-swap',
       () => {
