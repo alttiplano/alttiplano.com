@@ -1,53 +1,18 @@
 # Alttiplano
 
-A small, production-ready Astro base with accessible light/dark themes, client-side page transitions,
-and a structure that grows only when the site needs it.
+> Building the technology of tomorrow / TODAY.
 
-## What is included
+Tools and products of the future — from developer infrastructure to everyday consumer applications.
 
-- Astro 7 with static output.
-- Pure Astro components and scoped CSS.
-- A no-flash light/dark theme that survives client-side navigation.
-- Header, centered GXB content, social links, footer, and 404 page.
-- One route registry for navigation and active-link state.
-- Lucide interface icons and local SVG brand icons.
-- The `@/` alias for imports from `src/`.
+## Creations & Ecosystem
 
-Optional systems such as content collections, API routes, adapters, services, and stores are intentionally
-absent. Add them when the real site requires them instead of maintaining empty scaffolding.
-
-## Project structure
-
-```text
-src/
-├── assets/icons/social/ # Local brand icons imported by GXB
-├── components/          # GXB, Header, and reusable UI primitives
-│   └── ui/buttons/      # BackButton404 and ThemeToggle
-├── layouts/             # Document shell and global theme bootstrap
-├── pages/               # File-based routes
-├── sections/            # Page-level sections such as Footer
-├── styles/global.css    # Theme tokens and true global foundations
-├── consts.ts            # Site metadata and route registry
-└── env.d.ts             # Astro environment types
-```
-
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for ownership rules and extension recipes.
-
-## Commands
-
-| Command                | Action                                        |
-| :--------------------- | :-------------------------------------------- |
-| `bun install`          | Install dependencies                          |
-| `bun run dev`          | Start Astro locally                           |
-| `bun run build`        | Create the static production build in `dist/` |
-| `bun run preview`      | Preview the production build                  |
-
-## Customize the base
-
-1. Change the site name and description in `src/consts.ts`.
-2. Update the routes in the same file.
-3. Replace the social URLs in `src/components/GXB.astro`.
-4. Adjust shared theme colors in `src/styles/global.css`.
-5. Replace each placeholder page with real sections as the site grows.
-
-Astro documentation: <https://docs.astro.build>
+| Project / Tool | Category               | Description                                                                                                 |
+| :------------- | :--------------------- | :---------------------------------------------------------------------------------------------------------- |
+| **IDE**        | Developer Environment  | Next-generation intelligent code editor engineered for human-agent pair programming and instant compilation |
+| **Skill**      | Agent Skills           | Modular cognitive capabilities, autonomous workflows, and domain runbooks                                   |
+| **Extension**  | Productivity Plugins   | High-utility browser and code editor companion tools to eliminate daily friction                            |
+| **App**        | Consumer Applications  | Calm, elegant desktop and mobile software crafted for everyday people                                       |
+| **Framework**  | Multiplatform Engine   | Declarative cross-platform UI framework inspired by Flutter & Expo                                          |
+| **Jila**       | Linux Systems & Distro | Modern Linux workspace, custom distro utilities, and power-user tooling                                     |
+| **SVG Icons**  | Design Assets          | Pixel-accurate geometric icon library and vector assets for web interfaces                                  |
+| **Website**    | Digital Platform       | Official Alttiplano web hub, interactive documentation, and showcases                                       |
