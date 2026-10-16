@@ -1,5 +1,7 @@
 ---
 import { ClientRouter } from 'astro:transitions';
+import Analytics from '@vercel/analytics/astro';
+import SpeedInsights from '@vercel/speed-insights/astro';
 import Header from '@/components/Header.astro';
 import Footer from '@/sections/Footer.astro';
 import { SITE } from '@/consts';
@@ -57,6 +59,8 @@ const fullTitle = title ? `${title} · ${SITE.name}` : SITE.name;
       <slot />
     </main>
     {!hideNavAndFooter && <Footer />}
+    <Analytics />
+    <SpeedInsights />
   </body>
 </html>
 

@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@lucide/astro": "^1.50.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "astro": "^7.4.0"
   },
   "allowScripts": {
