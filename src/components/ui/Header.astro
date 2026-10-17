@@ -11,56 +11,41 @@ import { SITE } from '@/consts';
 
 <style>
   header {
+    --overhang: 2rem; /* how far the effect extends below the header */
+
     position: sticky;
     top: 0;
     z-index: 50;
   }
 
-  /* Capas de blur progresivo: cada una más fuerte y más corta que la anterior */
-  .veil {
+  .veil,
+  header::after {
+    content: '';
     position: absolute;
-    inset: 0 0 -2rem;
+    inset: 0 0 calc(var(--overhang) * -1);
     z-index: -1;
     pointer-events: none;
   }
 
+  /* Progressive blur: each layer is stronger and shorter than the previous one */
   .veil i {
+    --mask: linear-gradient(to bottom, #000 var(--hold), transparent var(--end));
+
     position: absolute;
     inset: 0;
     -webkit-backdrop-filter: blur(var(--blur));
     backdrop-filter: blur(var(--blur));
-    -webkit-mask-image: linear-gradient(to bottom, #000 var(--hold), transparent var(--end));
-    mask-image: linear-gradient(to bottom, #000 var(--hold), transparent var(--end));
+    -webkit-mask-image: var(--mask);
+    mask-image: var(--mask);
   }
 
-  .veil i:nth-child(1) {
-    --blur: 1px;
-    --hold: 55%;
-    --end: 100%;
-  }
-  .veil i:nth-child(2) {
-    --blur: 3px;
-    --hold: 40%;
-    --end: 85%;
-  }
-  .veil i:nth-child(3) {
-    --blur: 6px;
-    --hold: 30%;
-    --end: 70%;
-  }
-  .veil i:nth-child(4) {
-    --blur: 12px;
-    --hold: 20%;
-    --end: 55%;
-  }
+  .veil i:nth-child(1) { --blur: 1px; --hold: 55%; --end: 100%; }
+  .veil i:nth-child(2) { --blur: 3px; --hold: 40%; --end: 85%; }
+  .veil i:nth-child(3) { --blur: 6px; --hold: 30%; --end: 70%; }
+  .veil i:nth-child(4) { --blur: 12px; --hold: 20%; --end: 55%; }
 
-  /* Tinte: degradado de color, encima del blur, sin máscara */
+  /* Tint: unmasked color gradient on top of the blur, keeps the logo readable */
   header::after {
-    content: '';
-    position: absolute;
-    inset: 0 0 -2rem;
-    z-index: -1;
-    pointer-events: none;
     background: linear-gradient(
       to bottom,
       color-mix(in srgb, var(--color-bg) 80%, transparent) 0%,

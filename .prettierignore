@@ -7,3 +7,6 @@ bun.lock
 
 # Static assets — keep public/ (incl. the default Astro favicon) untouched
 public/
+
+# Go Git
+src/components/ui/Header.astro
