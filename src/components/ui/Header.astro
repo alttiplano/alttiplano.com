@@ -1,0 +1,54 @@
+---
+import { SITE } from '@/consts';
+---
+
+<header>
+  <nav aria-label="Primary navigation">
+    <a href="/" class="brand" aria-label={SITE.name}>
+      <span class="brand-name">{SITE.name}</span>
+    </a>
+  </nav>
+</header>
+
+<style>
+  header {
+    background-color: var(--color-bg);
+  }
+
+  nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    color: #4a4a4a;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .brand:hover {
+    color: var(--color-text);
+  }
+
+  :global([data-theme='dark']) .brand {
+    color: #b0b0b0;
+  }
+
+  .brand:focus-visible {
+    border-radius: 4px;
+    outline: 2px solid var(--color-text);
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 40rem) {
+    nav {
+      padding: 0.875rem 1rem;
+    }
+  }
+</style>
