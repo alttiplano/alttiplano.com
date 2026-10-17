@@ -12,7 +12,24 @@ import { SITE } from '@/consts';
 
 <style>
   header {
-    background-color: var(--color-bg);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    flex-shrink: 0;
+    border-bottom: 1px solid transparent;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: color-mix(in srgb, var(--color-bg) 65%, transparent);
+    -webkit-backdrop-filter: blur(10px) saturate(1.2);
+    backdrop-filter: blur(10px) saturate(1.2);
+    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
   }
 
   nav {
@@ -21,7 +38,7 @@ import { SITE } from '@/consts';
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1rem 1.5rem;
+    padding: 1.25rem 1.5rem;
   }
 
   .brand {
@@ -48,7 +65,7 @@ import { SITE } from '@/consts';
 
   @media (max-width: 40rem) {
     nav {
-      padding: 0.875rem 1rem;
+      padding: 1.125rem 1rem;
     }
   }
 </style>
