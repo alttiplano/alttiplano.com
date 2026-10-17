@@ -1,11 +1,11 @@
 ---
-import { SITE } from '@/consts';
+import Logo from '@/components/ui/header/logo.astro';
 ---
 
 <header>
   <div class="veil" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <nav aria-label="Primary navigation">
-    <a href="/" class="brand" aria-label={SITE.name}>{SITE.name}</a>
+    <Logo />
   </nav>
 </header>
 
@@ -38,10 +38,26 @@ import { SITE } from '@/consts';
     mask-image: var(--mask);
   }
 
-  .veil i:nth-child(1) { --blur: 1px; --hold: 55%; --end: 100%; }
-  .veil i:nth-child(2) { --blur: 3px; --hold: 40%; --end: 85%; }
-  .veil i:nth-child(3) { --blur: 6px; --hold: 30%; --end: 70%; }
-  .veil i:nth-child(4) { --blur: 12px; --hold: 20%; --end: 55%; }
+  .veil i:nth-child(1) {
+    --blur: 1px;
+    --hold: 55%;
+    --end: 100%;
+  }
+  .veil i:nth-child(2) {
+    --blur: 3px;
+    --hold: 40%;
+    --end: 85%;
+  }
+  .veil i:nth-child(3) {
+    --blur: 6px;
+    --hold: 30%;
+    --end: 70%;
+  }
+  .veil i:nth-child(4) {
+    --blur: 12px;
+    --hold: 20%;
+    --end: 55%;
+  }
 
   /* Tint: unmasked color gradient on top of the blur, keeps the logo readable */
   header::after {
@@ -63,22 +79,5 @@ import { SITE } from '@/consts';
     max-width: 1200px;
     margin: 0 auto;
     padding: clamp(1.125rem, 3vw, 1.25rem) clamp(1rem, 4vw, 1.5rem);
-  }
-
-  .brand {
-    color: color-mix(in srgb, var(--color-text) 65%, transparent);
-    font-weight: 700;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .brand:hover {
-    color: var(--color-text);
-  }
-
-  .brand:focus-visible {
-    border-radius: 4px;
-    outline: 2px solid var(--color-text);
-    outline-offset: 4px;
   }
 </style>

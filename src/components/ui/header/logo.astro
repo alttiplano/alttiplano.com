@@ -1,0 +1,197 @@
+---
+import Wordmark from '@/assets/icons/logos/wordmark.svg';
+import Symbol from '@/assets/icons/logos/mark.svg';
+import { SITE } from '@/consts';
+---
+
+<alttiplano-brand>
+  <a href="/" class="brand" aria-label={`${SITE.name} home`}>
+    <Wordmark class="wordmark" aria-hidden="true" focusable="false" />
+    <span class="fold" aria-hidden="true"></span>
+    <Symbol class="symbol" aria-hidden="true" focusable="false" />
+  </a>
+</alttiplano-brand>
+
+<style>
+  alttiplano-brand {
+    display: block;
+  }
+
+  .brand {
+    position: relative;
+    display: grid;
+    width: 5.25rem;
+    height: 1.25rem;
+    place-items: center;
+    color: var(--color-text);
+    text-decoration: none;
+    border-radius: 4px;
+  }
+
+  .brand::before {
+    content: '';
+    position: absolute;
+    inset: -0.75rem 0;
+  }
+
+  .brand:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 6px;
+  }
+
+  .wordmark,
+  .symbol,
+  .fold {
+    grid-area: 1 / 1;
+    display: block;
+    pointer-events: none;
+  }
+
+  .wordmark {
+    width: 100%;
+    height: auto;
+    transform-origin: center;
+  }
+
+  .symbol {
+    width: 1.5rem;
+    height: auto;
+    overflow: visible;
+    opacity: 0;
+  }
+
+  .fold {
+    width: 2px;
+    height: 1.125rem;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0;
+    transform: skewX(-30deg);
+  }
+
+  alttiplano-brand[data-compact] .wordmark {
+    opacity: 0;
+  }
+
+  alttiplano-brand[data-compact] .symbol {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  class AlttiplanoBrand extends HTMLElement {
+    private controller?: AbortController;
+    private animations: Animation[] = [];
+    private frame = 0;
+
+    connectedCallback() {
+      this.controller?.abort();
+      this.controller = new AbortController();
+      const { signal } = this.controller;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const strokes = [...this.querySelectorAll<SVGPathElement>('.symbol path')].map((path) => ({
+        path,
+        bounds: path.getBBox(),
+      }));
+      let previousProgress = -1;
+
+      const animate = (selector: string, keyframes: Keyframe[]) => {
+        const element = this.querySelector(selector);
+        if (!element) return;
+        const animation = element.animate(keyframes, { duration: 1000, fill: 'both' });
+        animation.pause();
+        this.animations.push(animation);
+      };
+
+      // Version 1: fold the wordmark onto a diagonal seam, then unfold the mark.
+      // Scroll position drives every frame, including the reverse motion.
+      animate('.wordmark', [
+        { offset: 0, transform: 'perspective(240px) rotateY(0deg) skewX(0deg)', opacity: 1 },
+        { offset: 0.12, transform: 'perspective(240px) rotateY(0deg) skewX(0deg)', opacity: 1 },
+        { offset: 0.46, transform: 'perspective(240px) rotateY(88deg) skewX(-30deg)', opacity: 0.75 },
+        { offset: 0.5, transform: 'perspective(240px) rotateY(90deg) skewX(-30deg)', opacity: 0 },
+        { offset: 1, transform: 'perspective(240px) rotateY(90deg) skewX(-30deg)', opacity: 0 },
+      ]);
+      animate('.fold', [
+        { offset: 0, opacity: 0, transform: 'skewX(-30deg) scaleY(0.8)' },
+        { offset: 0.32, opacity: 0, transform: 'skewX(-30deg) scaleY(0.8)' },
+        { offset: 0.46, opacity: 1, transform: 'skewX(-30deg) scaleY(1)' },
+        { offset: 0.6, opacity: 1, transform: 'skewX(-30deg) scaleY(1)' },
+        { offset: 0.85, opacity: 0, transform: 'skewX(-30deg) scaleY(0.85)' },
+        { offset: 1, opacity: 0, transform: 'skewX(-30deg) scaleY(0.85)' },
+      ]);
+      animate('.symbol', [
+        { offset: 0, opacity: 0 },
+        { offset: 0.48, opacity: 0 },
+        { offset: 0.65, opacity: 1 },
+        { offset: 1, opacity: 1 },
+      ]);
+
+      const update = () => {
+        this.frame = 0;
+        const progress = reducedMotion.matches
+          ? Number(window.scrollY > 96)
+          : Math.min(1, Math.max(0, (window.scrollY - 16) / 160));
+        if (progress === previousProgress) return;
+        previousProgress = progress;
+
+        const settled = progress === 0 || progress === 1;
+        this.toggleAttribute('data-compact', progress === 1);
+
+        for (const animation of this.animations) {
+          if (settled) {
+            // Release composited animation layers so the resting SVG renders directly.
+            animation.cancel();
+          } else {
+            if (animation.playState === 'idle') animation.pause();
+            animation.currentTime = progress * 1000;
+          }
+        }
+
+        strokes.forEach(({ path, bounds }, index) => {
+          if (settled) {
+            path.removeAttribute('transform');
+            path.removeAttribute('opacity');
+            return;
+          }
+
+          const unfold = Math.min(1, Math.max(0, (progress - 0.52) / 0.4));
+          const foot = Math.min(1, Math.max(0, (progress - 0.68) / 0.32));
+          const scaleX = index === 2 ? foot : 0.08 + 0.92 * unfold;
+          const scaleY = index === 2 ? foot : 1;
+          const shiftX = index === 2 ? -0.65 * (1 - foot) : (index === 0 ? 0.42 : -0.04) * (1 - unfold);
+          const shiftY = index === 2 ? -0.3 * (1 - foot) : 0;
+          const centerX = bounds.x + bounds.width / 2;
+          const centerY = bounds.y + bounds.height / 2;
+
+          // Native SVG transforms redraw vector geometry instead of scaling a CSS bitmap layer.
+          path.setAttribute('transform',
+            `translate(${centerX + shiftX * bounds.width} ${centerY + shiftY * bounds.height}) ` +
+            `scale(${scaleX} ${scaleY}) translate(${-centerX} ${-centerY})`);
+          if (index === 2) path.setAttribute('opacity', String(foot));
+        });
+      };
+      const schedule = () => {
+        if (!this.frame) this.frame = requestAnimationFrame(update);
+      };
+
+      update();
+      window.addEventListener('scroll', schedule, { passive: true, signal });
+      window.addEventListener('pageshow', schedule, { signal });
+      document.addEventListener('astro:page-load', schedule, { signal });
+      reducedMotion.addEventListener('change', schedule, { signal });
+    }
+
+    disconnectedCallback() {
+      this.controller?.abort();
+      cancelAnimationFrame(this.frame);
+      this.frame = 0;
+      for (const animation of this.animations) animation.cancel();
+      this.animations = [];
+    }
+  }
+
+  if (!customElements.get('alttiplano-brand')) {
+    customElements.define('alttiplano-brand', AlttiplanoBrand);
+  }
+</script>
