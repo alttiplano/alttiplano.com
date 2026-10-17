@@ -19,10 +19,11 @@ and the previous 32 px ICO are not enlarged. The symbol remains black on an
 opaque `#f0f0f0` background, matching the supplied reference and keeping it
 visible against light and dark browser chrome. Its aspect ratio is preserved.
 
-The browser icons use a 1400×1400 canvas around the 1064×750 symbol (76% width).
+The browser icons use a 1400×1400 canvas around the 1064×750 symbol (76% width),
+with rounded background corners (18.75% radius) and transparency outside them.
 The Apple and Android icons use a 1600×1600 canvas (66.5% width), leaving more
-space for the home-screen presentation. Backgrounds are square; devices apply
-their own corner treatment. Android icons declare `purpose: any`, not
+space for the home-screen presentation. Their backgrounds stay square; devices
+apply their own corner treatment. Android icons declare `purpose: any`, not
 `maskable`.
 
 `public/favicon.ico` is an identical compatibility copy for clients that request
