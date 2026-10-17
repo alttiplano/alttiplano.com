@@ -3,10 +3,9 @@ import { SITE } from '@/consts';
 ---
 
 <header>
+  <div class="veil" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <nav aria-label="Primary navigation">
-    <a href="/" class="brand" aria-label={SITE.name}>
-      <span class="brand-name">{SITE.name}</span>
-    </a>
+    <a href="/" class="brand" aria-label={SITE.name}>{SITE.name}</a>
   </nav>
 </header>
 
@@ -15,21 +14,61 @@ import { SITE } from '@/consts';
     position: sticky;
     top: 0;
     z-index: 50;
-    flex-shrink: 0;
-    border-bottom: 1px solid transparent;
   }
 
-  header::before {
-    content: '';
+  /* Capas de blur progresivo: cada una más fuerte y más corta que la anterior */
+  .veil {
     position: absolute;
-    inset: 0;
+    inset: 0 0 -2rem;
     z-index: -1;
     pointer-events: none;
-    background-color: color-mix(in srgb, var(--color-bg) 65%, transparent);
-    -webkit-backdrop-filter: blur(10px) saturate(1.2);
-    backdrop-filter: blur(10px) saturate(1.2);
-    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
-    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+  }
+
+  .veil i {
+    position: absolute;
+    inset: 0;
+    -webkit-backdrop-filter: blur(var(--blur));
+    backdrop-filter: blur(var(--blur));
+    -webkit-mask-image: linear-gradient(to bottom, #000 var(--hold), transparent var(--end));
+    mask-image: linear-gradient(to bottom, #000 var(--hold), transparent var(--end));
+  }
+
+  .veil i:nth-child(1) {
+    --blur: 1px;
+    --hold: 55%;
+    --end: 100%;
+  }
+  .veil i:nth-child(2) {
+    --blur: 3px;
+    --hold: 40%;
+    --end: 85%;
+  }
+  .veil i:nth-child(3) {
+    --blur: 6px;
+    --hold: 30%;
+    --end: 70%;
+  }
+  .veil i:nth-child(4) {
+    --blur: 12px;
+    --hold: 20%;
+    --end: 55%;
+  }
+
+  /* Tinte: degradado de color, encima del blur, sin máscara */
+  header::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 -2rem;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-bg) 80%, transparent) 0%,
+      color-mix(in srgb, var(--color-bg) 62%, transparent) 30%,
+      color-mix(in srgb, var(--color-bg) 30%, transparent) 60%,
+      color-mix(in srgb, var(--color-bg) 8%, transparent) 85%,
+      transparent 100%
+    );
   }
 
   nav {
@@ -38,34 +77,23 @@ import { SITE } from '@/consts';
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1.25rem 1.5rem;
+    padding: clamp(1.125rem, 3vw, 1.25rem) clamp(1rem, 4vw, 1.5rem);
   }
 
   .brand {
-    display: inline-flex;
-    align-items: center;
-    color: #4a4a4a;
+    color: color-mix(in srgb, var(--color-text) 65%, transparent);
     font-weight: 700;
     text-decoration: none;
+    transition: color 0.2s;
   }
 
   .brand:hover {
     color: var(--color-text);
   }
 
-  :global([data-theme='dark']) .brand {
-    color: #b0b0b0;
-  }
-
   .brand:focus-visible {
     border-radius: 4px;
     outline: 2px solid var(--color-text);
     outline-offset: 4px;
-  }
-
-  @media (max-width: 40rem) {
-    nav {
-      padding: 1.125rem 1rem;
-    }
   }
 </style>
