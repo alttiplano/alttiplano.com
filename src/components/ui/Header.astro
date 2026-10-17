@@ -20,7 +20,6 @@ import { SITE } from '@/consts';
 
   .veil,
   header::after {
-    content: '';
     position: absolute;
     inset: 0 0 calc(var(--overhang) * -1);
     z-index: -1;
@@ -46,6 +45,7 @@ import { SITE } from '@/consts';
 
   /* Tint: unmasked color gradient on top of the blur, keeps the logo readable */
   header::after {
+    content: '';
     background: linear-gradient(
       to bottom,
       color-mix(in srgb, var(--color-bg) 80%, transparent) 0%,
