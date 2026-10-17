@@ -1,5 +1,5 @@
 ---
-import Wordmark from '@/assets/icons/logos/wordmark.svg';
+import Wordmark from '@/assets/icons/logos/wordmark-capital.svg';
 import Symbol from '@/assets/icons/logos/mark.svg';
 import { SITE } from '@/consts';
 ---
@@ -165,9 +165,11 @@ import { SITE } from '@/consts';
           const centerY = bounds.y + bounds.height / 2;
 
           // Native SVG transforms redraw vector geometry instead of scaling a CSS bitmap layer.
-          path.setAttribute('transform',
+          path.setAttribute(
+            'transform',
             `translate(${centerX + shiftX * bounds.width} ${centerY + shiftY * bounds.height}) ` +
-            `scale(${scaleX} ${scaleY}) translate(${-centerX} ${-centerY})`);
+              `scale(${scaleX} ${scaleY}) translate(${-centerX} ${-centerY})`,
+          );
           if (index === 2) path.setAttribute('opacity', String(foot));
         });
       };

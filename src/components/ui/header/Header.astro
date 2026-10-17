@@ -38,26 +38,10 @@ import Logo from '@/components/ui/header/logo.astro';
     mask-image: var(--mask);
   }
 
-  .veil i:nth-child(1) {
-    --blur: 1px;
-    --hold: 55%;
-    --end: 100%;
-  }
-  .veil i:nth-child(2) {
-    --blur: 3px;
-    --hold: 40%;
-    --end: 85%;
-  }
-  .veil i:nth-child(3) {
-    --blur: 6px;
-    --hold: 30%;
-    --end: 70%;
-  }
-  .veil i:nth-child(4) {
-    --blur: 12px;
-    --hold: 20%;
-    --end: 55%;
-  }
+  .veil i:nth-child(1) {--blur: 1px;--hold: 55%;--end: 100%;}
+  .veil i:nth-child(2) {--blur: 3px;--hold: 40%;--end: 85%;}
+  .veil i:nth-child(3) {--blur: 6px;--hold: 30%;--end: 70%;}
+  .veil i:nth-child(4) {--blur: 12px;--hold: 20%;--end: 55%;}
 
   /* Tint: unmasked color gradient on top of the blur, keeps the logo readable */
   header::after {

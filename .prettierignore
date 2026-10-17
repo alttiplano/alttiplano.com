@@ -9,4 +9,4 @@ bun.lock
 public/
 
 # Go Git
-src/components/ui/Header.astro
+src/components/ui/header/
